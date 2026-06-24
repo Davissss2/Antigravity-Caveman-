@@ -1,6 +1,6 @@
 {
-  "name": "caveman-mode",
-  "displayName": "🦖 Caveman Mode",
+  "name": "antigravity-caveman",
+  "displayName": "🦖 Antigravity Caveman",
   "description": "Toggle caveman token compression for Antigravity AI — adds a status bar menu to activate/deactivate directly in the IDE",
   "version": "1.1.0",
   "publisher": "caveman",
