@@ -2,6 +2,10 @@
 
 > **"Why use many token when few do trick"**
 
+[![GitHub](https://img.shields.io/badge/GitHub-Davissss2%2FAntigravity--Caveman-181717?style=flat&logo=github)](https://github.com/Davissss2/Antigravity-Caveman-)
+[![Issues](https://img.shields.io/github/issues/Davissss2/Antigravity-Caveman-?style=flat&label=Issues)](https://github.com/Davissss2/Antigravity-Caveman-/issues)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)](https://github.com/Davissss2/Antigravity-Caveman-/blob/main/LICENSE)
+
 Antigravity Caveman is a powerful extension that optimizes the context window and speed of your AI model in Antigravity IDE. It modifies system instructions and deploys specialized agent skills to make the model speak with maximum conciseness while preserving 100% technical accuracy.
 
 ---
@@ -56,5 +60,36 @@ Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS) to access:
 
 ## 🛠️ Requirements & Installation
 
-1. Package and install the VSIX in your project workspace.
-2. **Compress CLI requirement**: The command `Compress Active File` requires `python` or `python3` configured in your PATH.
+1. Download the latest `.vsix` file from the [Releases page](https://github.com/Davissss2/Antigravity-Caveman-/releases) or the repository.
+2. In Antigravity IDE: `Extensions` → `...` → `Install from VSIX`.
+3. **Compress CLI requirement**: The command `Compress Active File` requires `python` or `python3` in your PATH.
+
+---
+
+## 🔗 Links
+
+| | |
+|---|---|
+| 📦 **Repository** | [github.com/Davissss2/Antigravity-Caveman-](https://github.com/Davissss2/Antigravity-Caveman-) |
+| 🐛 **Report a Bug** | [Open an Issue](https://github.com/Davissss2/Antigravity-Caveman-/issues/new?template=bug_report.md) |
+| 💡 **Request a Feature** | [Open an Issue](https://github.com/Davissss2/Antigravity-Caveman-/issues/new?template=feature_request.md) |
+| 📋 **All Issues** | [github.com/.../issues](https://github.com/Davissss2/Antigravity-Caveman-/issues) |
+| 📜 **Changelog** | [CHANGELOG.md](https://github.com/Davissss2/Antigravity-Caveman-/blob/main/CHANGELOG.md) |
+| ⚖️ **License** | [MIT](https://github.com/Davissss2/Antigravity-Caveman-/blob/main/LICENSE) |
+| 🙏 **Based on** | [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) |
+
+---
+
+## 🤝 Contributing
+
+Pull requests welcome! Open an issue first for big changes.
+
+1. Fork the repo
+2. Create your branch: `git checkout -b feat/my-feature`
+3. Commit: `git commit -m 'feat: add my feature'`
+4. Push: `git push origin feat/my-feature`
+5. Open a Pull Request
+
+---
+
+*Made with 🦖 by [Davissss2](https://github.com/Davissss2) — based on the excellent [caveman](https://github.com/JuliusBrussee/caveman) project by Julius Brussee.*
