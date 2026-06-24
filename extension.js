@@ -8,6 +8,7 @@ const cp = require('child_process');
 const GLOBAL_CONFIG_DIR = path.join(os.homedir(), '.gemini', 'config');
 const SKILLS_DIR        = path.join(GLOBAL_CONFIG_DIR, 'skills');
 const AGENTS_MD         = path.join(GLOBAL_CONFIG_DIR, 'AGENTS.md');
+const GEMINI_MD         = path.join(os.homedir(), '.gemini', 'GEMINI.md');
 const CAVEMAN_START     = '<!-- CAVEMAN_START -->';
 const CAVEMAN_END       = '<!-- CAVEMAN_END -->';
 
@@ -33,13 +34,18 @@ const INTENSITY_LABELS = {
 
 // ── State helpers ──────────────────────────────────────────────────────────
 function isActive() {
-  if (!fs.existsSync(AGENTS_MD)) return false;
-  return fs.readFileSync(AGENTS_MD, 'utf-8').includes(CAVEMAN_START);
+  if (fs.existsSync(AGENTS_MD) && fs.readFileSync(AGENTS_MD, 'utf-8').includes(CAVEMAN_START)) return true;
+  if (fs.existsSync(GEMINI_MD) && fs.readFileSync(GEMINI_MD, 'utf-8').includes(CAVEMAN_START)) return true;
+  return false;
 }
 
 function getIntensity() {
-  if (!fs.existsSync(AGENTS_MD)) return 'full';
-  const m = fs.readFileSync(AGENTS_MD, 'utf-8').match(/## Intensity Level: ([a-zA-Z0-9-]+)/);
+  let content = '';
+  if (fs.existsSync(AGENTS_MD)) content = fs.readFileSync(AGENTS_MD, 'utf-8');
+  else if (fs.existsSync(GEMINI_MD)) content = fs.readFileSync(GEMINI_MD, 'utf-8');
+  
+  if (!content) return 'full';
+  const m = content.match(/## Intensity Level: ([a-zA-Z0-9-]+)/);
   return m ? m[1] : 'full';
 }
 
@@ -53,6 +59,39 @@ function installSkills(extensionPath) {
       fs.cpSync(src, dest, { recursive: true, force: true });
     }
   }
+}
+
+// Write same block helper
+function updateRuleFile(filePath, dirPath, block) {
+  let content = '';
+  if (fs.existsSync(filePath)) content = fs.readFileSync(filePath, 'utf-8');
+
+  if (content.includes(CAVEMAN_START)) {
+    const s = content.indexOf(CAVEMAN_START);
+    const e = content.indexOf(CAVEMAN_END) + CAVEMAN_END.length;
+    content  = content.substring(0, s) + block + content.substring(e);
+  } else {
+    content = content.trim() ? content.trim() + '\n\n' + block : block;
+  }
+
+  if (dirPath && !fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+  fs.writeFileSync(filePath, content, 'utf-8');
+}
+
+// Remove block helper
+function removeRuleFile(filePath) {
+  if (!fs.existsSync(filePath)) return;
+  let content = fs.readFileSync(filePath, 'utf-8');
+  if (!content.includes(CAVEMAN_START)) return;
+
+  const s    = content.indexOf(CAVEMAN_START);
+  const e    = content.indexOf(CAVEMAN_END) + CAVEMAN_END.length;
+  const pre  = content.substring(0, s).trim();
+  const post = content.substring(e).trim();
+  content    = [pre, post].filter(Boolean).join('\n\n');
+
+  if (!content.trim()) fs.rmSync(filePath, { force: true });
+  else fs.writeFileSync(filePath, content, 'utf-8');
 }
 
 function removeSkills() {
@@ -74,40 +113,19 @@ ACTIVE EVERY RESPONSE. No revert after many turns. No filler drift. Still active
 Rule: ${INTENSITIES[intensity]}
 
 ## General Rules
-- Drop: articles (a/an/the), filler (just/really/basically/actually/simply), pleasantries (sure/certainly/of course/happy to), hedging. Fragments OK. Short synonyms. No tool-call narration, no decorative tables/emoji, no raw error logs unless asked. Standard acronyms OK. Technical terms exact. Code blocks unchanged. Errors quoted exact.
+- Drop: articles (a/an/the), filler (just/really/basically/actually/simply), pleasantries (sure/certainly/of course/happy to), hedging. Fragments OK. Short synonyms (big not extensive, fix not "implement a solution for"). No tool-call narration, no decorative tables/emoji, no dumping long raw error logs unless asked. Standard well-known tech acronyms OK. Technical terms exact. Code blocks unchanged. Errors quoted exact.
 - Preserve user's dominant language.
-- No self-reference. Never name or announce the style. No "caveman mode on", no third-person caveman tags.
+- No self-reference. Never name or announce the style. No "caveman mode on", "me caveman think", no third-person caveman tags.
 - Pattern: \`[thing] [action] [reason]. [next step].\`
 ${CAVEMAN_END}`;
 
-  let content = '';
-  if (fs.existsSync(AGENTS_MD)) content = fs.readFileSync(AGENTS_MD, 'utf-8');
-
-  if (content.includes(CAVEMAN_START)) {
-    const s = content.indexOf(CAVEMAN_START);
-    const e = content.indexOf(CAVEMAN_END) + CAVEMAN_END.length;
-    content  = content.substring(0, s) + block + content.substring(e);
-  } else {
-    content = content.trim() ? content.trim() + '\n\n' + block : block;
-  }
-
-  if (!fs.existsSync(GLOBAL_CONFIG_DIR)) fs.mkdirSync(GLOBAL_CONFIG_DIR, { recursive: true });
-  fs.writeFileSync(AGENTS_MD, content, 'utf-8');
+  updateRuleFile(AGENTS_MD, GLOBAL_CONFIG_DIR, block);
+  updateRuleFile(GEMINI_MD, path.dirname(GEMINI_MD), block);
 }
 
 function removeFromAgentsMd() {
-  if (!fs.existsSync(AGENTS_MD)) return;
-  let content = fs.readFileSync(AGENTS_MD, 'utf-8');
-  if (!content.includes(CAVEMAN_START)) return;
-
-  const s    = content.indexOf(CAVEMAN_START);
-  const e    = content.indexOf(CAVEMAN_END) + CAVEMAN_END.length;
-  const pre  = content.substring(0, s).trim();
-  const post = content.substring(e).trim();
-  content    = [pre, post].filter(Boolean).join('\n\n');
-
-  if (!content.trim()) fs.rmSync(AGENTS_MD, { force: true });
-  else fs.writeFileSync(AGENTS_MD, content, 'utf-8');
+  removeRuleFile(AGENTS_MD);
+  removeRuleFile(GEMINI_MD);
 }
 
 // ── Status bar ─────────────────────────────────────────────────────────────
