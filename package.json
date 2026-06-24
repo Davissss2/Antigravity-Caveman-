@@ -1,0 +1,38 @@
+{
+  "name": "caveman-mode",
+  "displayName": "🦖 Caveman Mode",
+  "description": "Toggle caveman token compression for Antigravity AI — adds a status bar menu to activate/deactivate directly in the IDE",
+  "version": "1.1.0",
+  "publisher": "caveman",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["caveman", "tokens", "compression", "antigravity", "ai"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "caveman.menu",
+        "title": "🦖 Caveman: Open Menu"
+      },
+      {
+        "command": "caveman.activate",
+        "title": "🦖 Caveman: Activate"
+      },
+      {
+        "command": "caveman.deactivate",
+        "title": "🛑 Caveman: Deactivate"
+      },
+      {
+        "command": "caveman.compressActiveFile",
+        "title": "🦖 Caveman: Compress Active File"
+      }
+    ]
+  },
+  "scripts": {
+    "package": "vsce package --allow-missing-publisher-name"
+  }
+}
