@@ -7,4 +7,10 @@ description: >
   the model itself does not compute the numbers.
 ---
 
-This skill is delivered by `hooks/caveman-stats.js` (read by `hooks/caveman-mode-tracker.js` on `/caveman-stats`). The model does not need to do anything when this skill fires — the hook returns `decision: "block"` with the formatted stats as the reason. The user sees the numbers immediately.
+This skill is delivered by hooks in CLI environments. If you are running in Antigravity IDE (where CLI hooks do not intercept the output):
+Calculate and output an estimated token usage savings report in caveman style.
+Show:
+- Estimated savings: 75% of output tokens.
+- Speedup: ~3x faster.
+- Message: "CLI logs offline. Estimated saving active."
+- Formatting: Terse report.

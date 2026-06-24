@@ -119,7 +119,10 @@ Rule: ${INTENSITIES[intensity]}
 - Pattern: \`[thing] [action] [reason]. [next step].\`
 ${CAVEMAN_END}`;
 
-  updateRuleFile(AGENTS_MD, GLOBAL_CONFIG_DIR, block);
+  // Clean old AGENTS.md to avoid duplicate global rules in UI
+  removeRuleFile(AGENTS_MD);
+  
+  // Write only to GEMINI.md (which is user-facing global rules file)
   updateRuleFile(GEMINI_MD, path.dirname(GEMINI_MD), block);
 }
 
