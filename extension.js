@@ -16,8 +16,8 @@ const CAVEMAN_SKILLS = ['caveman', 'caveman-commit', 'caveman-review', 'caveman-
 
 const INTENSITIES = {
   lite:          'No filler/hedging. Keep articles + full sentences. Professional but tight.',
-  full:          'Drop articles, fragments OK, short synonyms. Classic caveman. No tool-call narration, no emoji, no raw log dumps. Standard acronyms OK.',
-  ultra:         'Abbreviate prose words (DB/auth/config/req/res/fn/impl) — never code symbols/names. Strip conjunctions, arrows for causality (X → Y), one word when enough.',
+  full:          'Smart caveman. Drop articles, pronouns, filler. Fragments OK. Short synonyms. No conversational padding, only direct technical facts.',
+  ultra:         'Telegraphic mode. Zero verbs/pronouns/articles/framing. Output only raw keywords, symbols, and status. Abbreviate prose aggressively (DB/auth/config/req/res/fn/impl/err/usr/msg/env). Use X → Y for steps/causality. Max 3-5 words per line.',
   'wenyan-lite': 'Semi-classical Chinese. Drop filler/hedging, keep grammar structure, classical register.',
   'wenyan-full': 'Fully 文言文. 80-90% character reduction. Classical patterns, verbs before objects, classical particles (之/乃/為/其).',
   'wenyan-ultra':'Extreme classical Chinese abbreviation. Maximum compression, ultra terse.'
