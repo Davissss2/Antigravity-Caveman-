@@ -35,7 +35,8 @@ Yes: "Bug in auth middleware. Token expiry check use `<` not `<=`. Fix:"
 |-------|------------|
 | **lite** | No filler/hedging. Keep articles + full sentences. Professional but tight |
 | **full** | Smart caveman. Drop articles, pronouns, filler. Fragments OK. Short synonyms. No conversational padding, only direct technical facts. |
-| **ultra** | Telegraphic mode. Zero verbs/pronouns/articles/framing. Output only raw keywords, symbols, and status. Abbreviate prose aggressively (DB/auth/config/req/res/fn/impl/err/usr/msg/env). Use X → Y for steps/causality. Max 3-5 words per line. |
+| **ultra** | Telegraphic mode. Zero verbs/pronouns/articles/framing/pleasantries. Output only raw keywords, symbols, status. Ban conversational words. Abbreviate prose aggressively (DB/auth/config/req/res/fn/impl/err/usr/msg/env). Use X → Y steps. Max 3 words per line, max 10-15 words total prose. No conversational intro/outro/explanation. Output raw code/diff only. |
+| **nano** | Nano mode. Single-char abbreviations, logic/math symbols (∴, ∵, ⇒, ∅, +, -). Prose strictly banned. Raw code blocks only. |
 | **wenyan-lite** | Semi-classical. Drop filler/hedging but keep grammar structure, classical register |
 | **wenyan-full** | Maximum classical terseness. Fully 文言文. 80-90% character reduction. Classical sentence patterns, verbs precede objects, subjects often omitted, classical particles (之/乃/為/其) |
 | **wenyan-ultra** | Extreme abbreviation while keeping classical Chinese feel. Maximum compression, ultra terse |
@@ -44,6 +45,7 @@ Example — "Why React component re-render?"
 - lite: "Your component re-renders because you create a new object reference each render. Wrap it in `useMemo`."
 - full: "New object ref each render. Inline object prop = new ref = re-render. Wrap in `useMemo`."
 - ultra: "Inline obj prop → new ref → re-render. `useMemo`."
+- nano: "obj ref ⇒ re-render. useMemo."
 - wenyan-lite: "組件頻重繪，以每繪新生對象參照故。以 useMemo 包之。"
 - wenyan-full: "每繪新生對象參照，故重繪；以 useMemo 包之則免。"
 - wenyan-ultra: "新參照→重繪。useMemo Wrap。"
@@ -52,6 +54,7 @@ Example — "Explain database connection pooling."
 - lite: "Connection pooling reuses open connections instead of creating new ones per request. Avoids repeated handshake overhead."
 - full: "Pool reuse open DB connections. No new connection per request. Skip handshake overhead."
 - ultra: "Pool = reuse DB conn. Skip handshake → fast under load."
+- nano: "DB pool ∴ no handshake."
 - wenyan-full: "池reuse open connection。不每req新開。skip handshake overhead。"
 - wenyan-ultra: "池reuse conn。skip handshake → fast。"
 

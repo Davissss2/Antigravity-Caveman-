@@ -17,7 +17,8 @@ const CAVEMAN_SKILLS = ['caveman', 'caveman-commit', 'caveman-review', 'caveman-
 const INTENSITIES = {
   lite:          'No filler/hedging. Keep articles + full sentences. Professional but tight.',
   full:          'Smart caveman. Drop articles, pronouns, filler. Fragments OK. Short synonyms. No conversational padding, only direct technical facts.',
-  ultra:         'Telegraphic mode. Zero verbs/pronouns/articles/framing. Output only raw keywords, symbols, and status. Abbreviate prose aggressively (DB/auth/config/req/res/fn/impl/err/usr/msg/env). Use X → Y for steps/causality. Max 3-5 words per line.',
+  ultra:         'Telegraphic mode. Zero verbs/pronouns/articles/framing/pleasantries. Output only raw keywords, symbols, status. Ban conversational words. Abbreviate prose aggressively (DB/auth/config/req/res/fn/impl/err/usr/msg/env). Use X → Y steps. Max 3 words per line, max 10-15 words total prose. No conversational intro/outro/explanation. Output raw code/diff only.',
+  nano:          'Nano mode. Single-char abbreviations, logic/math symbols (∴, ∵, ⇒, ∅, +, -). Prose strictly banned. Raw code blocks only.',
   'wenyan-lite': 'Semi-classical Chinese. Drop filler/hedging, keep grammar structure, classical register.',
   'wenyan-full': 'Fully 文言文. 80-90% character reduction. Classical patterns, verbs before objects, classical particles (之/乃/為/其).',
   'wenyan-ultra':'Extreme classical Chinese abbreviation. Maximum compression, ultra terse.'
@@ -27,6 +28,7 @@ const INTENSITY_LABELS = {
   lite:          '⬜ lite   — drop filler, keep sentences',
   full:          '🟦 full   — classic caveman (default)',
   ultra:         '🟥 ultra  — extreme compression',
+  nano:          '🔥 nano   — maximum compression (symbols only)',
   'wenyan-lite': '🟨 wenyan-lite  — semi-classical Chinese',
   'wenyan-full': '🟧 wenyan-full  — full 文言文',
   'wenyan-ultra':'🟫 wenyan-ultra — extreme classical Chinese'
@@ -119,11 +121,11 @@ Rule: ${INTENSITIES[intensity]}
 - Pattern: \`[thing] [action] [reason]. [next step].\`
 ${CAVEMAN_END}`;
 
-  // Clean old AGENTS.md to avoid duplicate global rules in UI
-  removeRuleFile(AGENTS_MD);
+  // Clean old GEMINI.md to avoid duplicate global rules in UI and confusion
+  removeRuleFile(GEMINI_MD);
   
-  // Write only to GEMINI.md (which is user-facing global rules file)
-  updateRuleFile(GEMINI_MD, path.dirname(GEMINI_MD), block);
+  // Write only to AGENTS.md (which is user-facing global rules file)
+  updateRuleFile(AGENTS_MD, path.dirname(AGENTS_MD), block);
 }
 
 function removeFromAgentsMd() {
@@ -257,6 +259,220 @@ async function compressActiveFile(extensionPath) {
   });
 }
 
+function getWorkspacePath() {
+  if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+    return vscode.workspace.workspaceFolders[0].uri.fsPath;
+  }
+  return null;
+}
+
+function generateCommitMessageCommand() {
+  const cwd = getWorkspacePath();
+  if (!cwd) {
+    vscode.window.showErrorMessage('❌ No workspace open.');
+    return;
+  }
+
+  cp.exec('git diff --cached', { cwd }, (err, stdout) => {
+    if (err) {
+      vscode.window.showErrorMessage('❌ Failed to run git diff: ' + err.message);
+      return;
+    }
+
+    let diff = stdout.trim();
+    let msg = '🦖 Staged changes compiled and copied to clipboard!';
+
+    if (!diff) {
+      // Fallback to unstaged changes
+      cp.exec('git diff', { cwd }, (err2, stdout2) => {
+        let diff2 = stdout2 ? stdout2.trim() : '';
+        if (diff2) {
+          diff = diff2;
+          msg = '⚠️ No staged changes. Unstaged changes compiled and copied to clipboard!';
+          copyPrompt(diff, msg);
+        } else {
+          // Fallback to status
+          cp.exec('git status', { cwd }, (err3, stdout3) => {
+            const status = stdout3 ? stdout3.trim() : '';
+            msg = '⚠️ No diff found. Git status copied to clipboard!';
+            copyPrompt(status || 'No changes.', msg);
+          });
+        }
+      });
+    } else {
+      copyPrompt(diff, msg);
+    }
+  });
+
+  function copyPrompt(gitInfo, successMsg) {
+    const prompt = `/caveman-commit\nGenerate a conventional commit message for the following changes:\n\n\`\`\`diff\n${gitInfo}\n\`\`\``;
+    vscode.env.clipboard.writeText(prompt).then(() => {
+      vscode.window.showInformationMessage(successMsg);
+    });
+  }
+}
+
+function codeReviewCommand() {
+  const cwd = getWorkspacePath();
+  const editor = vscode.window.activeTextEditor;
+  
+  if (editor && fs.existsSync(editor.document.fileName)) {
+    const filePath = editor.document.fileName;
+    cp.exec(`git diff HEAD -- "${filePath}"`, { cwd: cwd || path.dirname(filePath) }, (err, stdout) => {
+      let diff = stdout ? stdout.trim() : '';
+      if (diff) {
+        copyPrompt(diff, `🦖 Diff for ${path.basename(filePath)} compiled and copied to clipboard!`);
+      } else {
+        // Fallback: use active selection or full file text
+        const selection = editor.document.getText(editor.selection).trim();
+        if (selection) {
+          copyPrompt(selection, `🦖 Selected code in ${path.basename(filePath)} compiled and copied to clipboard!`);
+        } else {
+          const fullText = editor.document.getText().trim();
+          copyPrompt(fullText, `🦖 Full content of ${path.basename(filePath)} compiled and copied to clipboard!`);
+        }
+      }
+    });
+  } else if (cwd) {
+    // Fallback: review entire workspace diff
+    cp.exec('git diff', { cwd }, (err, stdout) => {
+      const diff = stdout ? stdout.trim() : '';
+      if (diff) {
+        copyPrompt(diff, '🦖 Workspace diff compiled and copied to clipboard!');
+      } else {
+        vscode.window.showWarningMessage('⚠️ No active editor and no git diff in workspace to review.');
+      }
+    });
+  } else {
+    vscode.window.showErrorMessage('❌ No active editor and no open workspace.');
+  }
+
+  function copyPrompt(codeContent, successMsg) {
+    const prompt = `/caveman-review\nReview the following changes/code:\n\n\`\`\`\n${codeContent}\n\`\`\``;
+    vscode.env.clipboard.writeText(prompt).then(() => {
+      vscode.window.showInformationMessage(successMsg);
+    });
+  }
+}
+
+function showStatsCommand() {
+  const geminiDir = path.join(os.homedir(), '.gemini', 'config');
+  const claudeDir = path.join(os.homedir(), '.claude');
+  
+  // Find latest session file
+  let latestFile = null;
+  let latestMtime = 0;
+
+  function scanDir(dir) {
+    if (!fs.existsSync(dir)) return;
+    try {
+      const files = fs.readdirSync(dir);
+      for (const file of files) {
+        const fullPath = path.join(dir, file);
+        const stat = fs.statSync(fullPath);
+        if (stat.isDirectory()) {
+          scanDir(fullPath);
+        } else if (file.endsWith('.jsonl')) {
+          if (stat.mtimeMs > latestMtime) {
+            latestMtime = stat.mtimeMs;
+            latestFile = fullPath;
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  scanDir(path.join(geminiDir, 'projects'));
+  if (!latestFile) {
+    scanDir(path.join(claudeDir, 'projects'));
+  }
+
+  const channel = vscode.window.createOutputChannel("🦖 Caveman Stats");
+  channel.clear();
+  channel.show();
+
+  if (!latestFile) {
+    channel.appendLine("========================================");
+    channel.appendLine("🦖 Caveman Stats");
+    channel.appendLine("========================================");
+    channel.appendLine("No active session logs found.");
+    channel.appendLine("Start a conversation with the AI to track stats.");
+    return;
+  }
+
+  try {
+    const raw = fs.readFileSync(latestFile, 'utf-8');
+    let outputTokens = 0;
+    let cacheReadTokens = 0;
+    let turns = 0;
+    let model = 'unknown';
+
+    for (const line of raw.split('\n')) {
+      if (!line.trim()) continue;
+      try {
+        const entry = JSON.parse(line);
+        // support both Claude Code (message.usage) and Antigravity/Gemini (message.usage or tool_calls) formats
+        if (entry.type === 'assistant' || entry.source === 'MODEL' || entry.role === 'assistant') {
+          turns++;
+        }
+        
+        // Parse token usage if available in the log
+        const usage = entry.usage || (entry.message && entry.message.usage);
+        if (usage) {
+          outputTokens += usage.output_tokens || usage.outputTokens || 0;
+          cacheReadTokens += usage.cache_read_input_tokens || usage.cacheReadInputTokens || 0;
+        }
+        
+        if (entry.model || (entry.message && entry.message.model)) {
+          model = entry.model || entry.message.model;
+        }
+      } catch (e) {}
+    }
+
+    channel.appendLine("========================================");
+    channel.appendLine("🦖 Caveman Stats");
+    channel.appendLine("========================================");
+    channel.appendLine(`Session:  ${path.basename(latestFile)}`);
+    channel.appendLine(`Model:    ${model}`);
+    channel.appendLine(`Turns:    ${turns}`);
+    channel.appendLine("----------------------------------------");
+    channel.appendLine(`Output tokens:     ${outputTokens.toLocaleString()}`);
+    channel.appendLine(`Cache-read tokens: ${cacheReadTokens.toLocaleString()}`);
+    channel.appendLine("----------------------------------------");
+    
+    // Estimate savings based on active mode
+    let content = '';
+    if (fs.existsSync(AGENTS_MD)) content = fs.readFileSync(AGENTS_MD, 'utf-8');
+    
+    let activeMode = 'off';
+    if (content.includes(CAVEMAN_START)) {
+      const m = content.match(/## Intensity Level: ([a-zA-Z0-9-]+)/);
+      if (m) activeMode = m[1];
+    }
+
+    channel.appendLine(`Active Mode:       ${activeMode}`);
+
+    if (activeMode !== 'off') {
+      let ratio = 0.65; // default estimation for 'full'
+      if (activeMode === 'lite') ratio = 0.35;
+      if (activeMode === 'ultra') ratio = 0.80;
+      if (activeMode === 'nano') ratio = 0.90;
+      if (activeMode.startsWith('wenyan')) ratio = 0.85;
+
+      const estNormal = Math.round(outputTokens / (1 - ratio));
+      const estSaved = estNormal - outputTokens;
+      channel.appendLine(`Estimated savings: ~${Math.round(ratio * 100)}%`);
+      channel.appendLine(`Tokens saved:      ~${estSaved.toLocaleString()}`);
+    } else {
+      channel.appendLine("Caveman Mode is not active.");
+    }
+    channel.appendLine("========================================");
+
+  } catch (err) {
+    channel.appendLine(`❌ Error reading stats: ${err.message}`);
+  }
+}
+
 // ── Activate extension ─────────────────────────────────────────────────────
 function activate(context) {
   const bar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -296,6 +512,18 @@ function activate(context) {
     vscode.commands.registerCommand('caveman.compressActiveFile', () => {
       compressActiveFile(context.extensionPath);
     })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('caveman.generateCommit', generateCommitMessageCommand)
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('caveman.codeReview', codeReviewCommand)
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('caveman.showStats', showStatsCommand)
   );
 }
 

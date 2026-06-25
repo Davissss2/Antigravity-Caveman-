@@ -7,7 +7,7 @@ description: >
   /caveman-review. Auto-triggers when reviewing pull requests.
 ---
 
-Write code review comments terse and actionable. One line per finding. Location, problem, fix. No throat-clearing.
+Before reviewing, you MUST run a tool (e.g. run `git diff` or search/list modified files) to gather and compile all recent code changes. Read the contents of any modified files. Once gathered, write code review comments terse and actionable. One line per finding. Location, problem, fix. No throat-clearing.
 
 ## Rules
 

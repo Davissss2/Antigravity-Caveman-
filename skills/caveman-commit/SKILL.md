@@ -7,7 +7,7 @@ description: >
   "/commit", or invokes /caveman-commit. Auto-triggers when staging changes.
 ---
 
-Write commit messages terse and exact. Conventional Commits format. No fluff. Why over what.
+Before writing, you MUST run a tool (e.g. run `git diff --cached`) to gather and compile all currently staged changes. If no changes are staged, run `git status` or check unstaged changes. Once gathered, write commit messages terse and exact. Conventional Commits format. No fluff. Why over what.
 
 ## Rules
 

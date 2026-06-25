@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.0
+
+- **Fixed Rules Target Path**: Writes strictly to `~/.gemini/config/AGENTS.md` instead of `GEMINI.md` so Antigravity IDE immediately loads the custom rule configurations.
+- **Enhanced ultra mode**: Strictly bans conversational words, limits prose to 10-15 tokens, and outputs code/diffs only.
+- **Added nano mode**: Extreme symbolic compression level using mathematical and logical symbols (∴, ∵, ⇒, ∅, +, -) for maximum token savings with zero prose.
+- **Dynamic Context VS Code Commands**:
+  - `🦖 Caveman: Generate Commit Message`: Automatically runs `git diff --cached` (falls back to unstaged diff / status), formats the prompt, and copies it to the clipboard.
+  - `🦖 Caveman: Code Review`: Dynamically compiles active file diff (falls back to selection / full text), formats the review request, and copies it to the clipboard.
+  - `🦖 Caveman: Show Session Stats`: Scans session logs and displays actual token metrics, turns, and estimated savings in a custom VS Code Output Channel.
+
 ## 1.3.0
 
 - **full** mode now drops articles, pronouns and filler — less chatter, only technical facts.
