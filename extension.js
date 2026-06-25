@@ -126,11 +126,30 @@ ${CAVEMAN_END}`;
   
   // Write only to AGENTS.md (which is user-facing global rules file)
   updateRuleFile(AGENTS_MD, path.dirname(AGENTS_MD), block);
+
+  // Write flag file for terminal hook synchronization
+  try {
+    const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
+    if (!fs.existsSync(claudeDir)) fs.mkdirSync(claudeDir, { recursive: true });
+    const flagPath = path.join(claudeDir, '.caveman-active');
+    fs.writeFileSync(flagPath, intensity, 'utf-8');
+  } catch (e) {
+    // Ignore
+  }
 }
 
 function removeFromAgentsMd() {
   removeRuleFile(AGENTS_MD);
   removeRuleFile(GEMINI_MD);
+
+  // Remove flag file
+  try {
+    const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
+    const flagPath = path.join(claudeDir, '.caveman-active');
+    if (fs.existsSync(flagPath)) fs.unlinkSync(flagPath);
+  } catch (e) {
+    // Ignore
+  }
 }
 
 // ── Status bar ─────────────────────────────────────────────────────────────

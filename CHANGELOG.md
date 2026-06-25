@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.0
+
+- **Fixed mode-switching sync bug**: Changing caveman intensity (e.g. from `nano` to `ultra` or vice versa) or deactivating it via VS Code Status Bar Menu or web dashboard now correctly synchronizes the `.caveman-active` flag file, ensuring active terminal sessions immediately reflect the updated style rules instead of staying locked to the previous mode.
+- **Detailed Documentation**: Fully updated and improved the README.md and codebase instructions for all commands, capabilities, and settings.
+
 ## 1.5.0
 
 - **Fixed Rules Target Path**: Writes strictly to `~/.gemini/config/AGENTS.md` instead of `GEMINI.md` so Antigravity IDE immediately loads the custom rule configurations.

@@ -55,6 +55,9 @@ Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS) to access:
 - **`🦖 Caveman: Activate`**: Direct activation prompt.
 - **`🛑 Caveman: Deactivate`**: Instantly revert the AI to normal mode.
 - **`🦖 Caveman: Compress Active File`**: Runs memory compression on the current open markdown/text document.
+- **`🦖 Caveman: Generate Commit Message`**: Automatically gathers your staged git diff (falls back to unstaged or git status if nothing is staged), wraps it in `/caveman-commit`, and copies it to your clipboard for instant paste into the AI chat.
+- **`🦖 Caveman: Code Review`**: Compiles the git diff of your active file (falls back to selection or full file text if no diff exists), formats it into `/caveman-review`, and copies it to your clipboard.
+- **`🦖 Caveman: Show Session Stats`**: Scans the IDE conversation logs in the background and opens a dedicated VS Code Output Channel showing total output tokens, cached input tokens, and estimated cost savings.
 
 ---
 
